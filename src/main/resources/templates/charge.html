@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포인트 충전</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+<nav class="bg-blue-600 p-4 text-white flex justify-between items-center">
+    <a href="/" class="text-xl font-bold">경매 웹서비스</a>
+    <div>
+        <a href="/dashboard" class="px-3 py-2 bg-green-500 text-white rounded-lg">대시보드</a>
+        <a href="/logout" class="px-3 py-2 bg-red-500 text-white rounded-lg">로그아웃</a>
+    </div>
+</nav>
+
+<div class="container mx-auto mt-10 text-center">
+    <h1 class="text-3xl font-bold text-gray-800">포인트 충전</h1>
+
+    <!-- 현재 보유 포인트 표시 -->
+    <p class="text-lg text-gray-700 mt-4">현재 보유 포인트: <span th:text="${points}"></span> P</p>
+
+    <!-- 충전 성공 메시지 표시 -->
+    <p th:if="${message}" class="text-green-600 font-semibold mt-2" th:text="${message}"></p>
+
+    <!-- 포인트 충전 폼 -->
+    <form method="post" action="/charge" class="mt-6">
+        <label class="block text-gray-700">충전할 금액 (P):</label>
+        <input type="number" name="amount" min="1" required class="w-1/2 p-2 border border-gray-300 rounded-lg mt-2">
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg mt-4">충전하기</button>
+    </form>
+    <a href="/charge-history" class="mt-4 block text-blue-600">충전 내역 보기</a>
+    <a href="/dashboard" class="block mt-6 text-blue-600">대시보드로 돌아가기</a>
+</div>
+</body>
+</html>

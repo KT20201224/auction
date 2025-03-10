@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex justify-center items-center h-screen">
+<div class="bg-white p-8 shadow-lg rounded-lg w-96">
+    <h2 class="text-2xl font-bold text-gray-800 text-center">회원가입</h2>
+    <form method="post" action="/register">
+        <div class="mt-4">
+            <label class="block text-gray-700">이메일</label>
+            <input type="email" name="email" class="w-full p-2 border border-gray-300 rounded-lg" required>
+        </div>
+        <div class="mt-4">
+            <label class="block text-gray-700">비밀번호</label>
+            <input type="password" name="password" class="w-full p-2 border border-gray-300 rounded-lg" required>
+        </div>
+        <div class="mt-4">
+            <label class="block text-gray-700">이름</label>
+            <input type="text" name="name" class="w-full p-2 border border-gray-300 rounded-lg" required>
+        </div>
+        <button type="submit" class="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg">회원가입</button>
+    </form>
+    <p class="mt-4 text-gray-600 text-center">
+        이미 계정이 있으신가요? <a href="/login" class="text-blue-600">로그인</a>
+    </p>
+    <!-- 오류 메시지 출력 -->
+    <p th:if="${error}" class="text-red-500 text-center mt-2" th:text="${error}"></p>
+</div>
+</body>
+</html>

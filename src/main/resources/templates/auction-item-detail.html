@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>경매 상품 상세</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+<div class="container mx-auto mt-10 text-center">
+    <h1 class="text-3xl font-bold text-gray-800" th:text="${item.name}"></h1>
+    <p class="text-gray-700 mt-4" th:text="${item.description}"></p>
+
+    <div class="mt-6">
+        <p class="text-xl font-semibold text-gray-800">시작 가격: <span th:text="${item.startPrice} + ' P'"></span></p>
+        <p class="text-xl font-semibold text-gray-800 mt-2">마감 시간: <span th:text="${#temporals.format(item.endTime, 'yyyy년 MM월 dd일 HH:mm')}"></span></p>
+    </div>
+
+    <!-- 현재 최고 입찰가 (입찰 기능 추가 후 적용 예정) -->
+    <div class="mt-6">
+        <p class="text-xl font-semibold text-red-600">현재 최고 입찰가: <span id="currentBid">-</span> P</p>
+    </div>
+
+    <!-- 입찰 기능 추가 공간 -->
+    <div class="mt-6">
+        <p class="text-lg font-semibold text-gray-800">입찰 기능은 곧 추가될 예정입니다!</p>
+    </div>
+
+    <!-- 페이지 이동 버튼 -->
+    <div class="mt-6">
+        <a href="/auction-items" class="px-4 py-2 bg-gray-500 text-white rounded-lg">경매 상품 목록</a>
+        <a href="/dashboard" class="px-4 py-2 bg-yellow-500 text-white rounded-lg ml-2">대시보드</a>
+    </div>
+</div>
+</body>
+</html>

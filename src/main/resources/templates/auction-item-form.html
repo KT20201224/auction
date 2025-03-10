@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>경매 상품 등록</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+<div class="container mx-auto mt-10 text-center">
+    <h1 class="text-3xl font-bold text-gray-800">경매 상품 등록</h1>
+    <form method="post" action="/auction-item/new" class="mt-6">
+        <label class="block text-gray-700">상품명:</label>
+        <input type="text" name="name" required class="w-1/2 p-2 border border-gray-300 rounded-lg mt-2">
+
+        <label class="block text-gray-700 mt-4">상품 설명:</label>
+        <textarea name="description" required class="w-1/2 p-2 border border-gray-300 rounded-lg mt-2"></textarea>
+
+        <label class="block text-gray-700 mt-4">시작 가격:</label>
+        <input type="number" name="startPrice" required class="w-1/2 p-2 border border-gray-300 rounded-lg mt-2">
+
+        <label class="block text-gray-700 mt-4">경매 마감 시간 (YYYY-MM-DDTHH:MM:SS):</label>
+        <input type="datetime-local" name="endTime" required class="w-1/2 p-2 border border-gray-300 rounded-lg mt-2">
+
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg mt-4">등록하기</button>
+    </form>
+
+    <a href="/auction-items" class="mt-6 block text-blue-600">경매 상품 목록으로 돌아가기</a>
+</div>
+</body>
+</html>
