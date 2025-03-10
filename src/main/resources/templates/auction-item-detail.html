@@ -23,7 +23,13 @@
 
     <!-- 입찰 기능 추가 공간 -->
     <div class="mt-6">
-        <p class="text-lg font-semibold text-gray-800">입찰 기능은 곧 추가될 예정입니다!</p>
+        <h2 class="text-xl font-bold text-gray-800">입찰하기</h2>
+        <form method="post" action="/bid">
+            <input type="hidden" name="auctionItemId" th:value="${item.id}">
+            <label class="block text-gray-700 mt-4">입찰 금액:</label>
+            <input type="number" name="bidAmount" required class="w-1/4 p-2 border border-gray-300 rounded-lg mt-2">
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg mt-4">입찰하기</button>
+        </form>
     </div>
 
     <!-- 페이지 이동 버튼 -->
