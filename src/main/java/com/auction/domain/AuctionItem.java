@@ -14,12 +14,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "auction_item")
+@Table(name = "auction_item") // 기존 테이블 유지
 public class AuctionItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // 상품 ID (자동 증가)
+    private Long id; // 상품 ID
 
     @Column(nullable = false)
     private String name; // 상품명
@@ -35,5 +35,37 @@ public class AuctionItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User seller; // 상품을 등록한 사용자
+    private User seller; // 판매자
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "winner_id")
+    private User winner; // 낙찰자 (없으면 유찰)
+
+    @Column(nullable = false)
+    private boolean isPurchased = false; // 🔹 구매 확정 여부 (기본값 false)
+
+    /**
+     * 경매가 마감되었는지 여부를 반환
+     *
+     * @return true(마감됨), false(진행 중)
+     */
+    public boolean isAuctionEnded() {
+        return LocalDateTime.now().isAfter(this.endTime);
+    }
+
+    /**
+     * 구매 확정 여부를 반환
+     *
+     * @return true(구매 완료), false(미구매)
+     */
+    public boolean isPurchased() {
+        return isPurchased;
+    }
+
+    /**
+     * 낙찰자가 구매 확정을 하면 상태를 변경
+     */
+    public void confirmPurchase() {
+        this.isPurchased = true;
+    }
 }

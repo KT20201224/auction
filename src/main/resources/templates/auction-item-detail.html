@@ -32,14 +32,30 @@
         </p>
     </div>
 
-    <!-- 입찰 기능 추가 공간 -->
+    <!-- 경매 상태 표시 -->
     <div class="mt-6">
+        <p class="text-xl font-semibold"
+           th:classappend="${item.auctionEnded} ? 'text-red-600' : 'text-green-600'">
+            <span th:if="${item.auctionEnded}">경매 마감됨</span>
+            <span th:unless="${item.auctionEnded}">경매 진행 중</span>
+        </p>
+    </div>
+
+    <!-- 입찰하기 폼 (경매가 진행 중인 경우에만 표시) -->
+    <div class="mt-6" th:if="${not item.auctionEnded}">
         <h2 class="text-xl font-bold text-gray-800">입찰하기</h2>
         <form method="post" action="/bid">
             <input type="hidden" name="auctionItemId" th:value="${item.id}">
             <label class="block text-gray-700 mt-4">입찰 금액:</label>
             <input type="number" name="bidAmount" required class="w-1/4 p-2 border border-gray-300 rounded-lg mt-2">
             <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg mt-4">입찰하기</button>
+        </form>
+    </div>
+
+    <!-- 구매 확정 버튼 (낙찰자인 경우에만 표시) -->
+    <div th:if="${item.winner != null and user != null and item.winner.email == user.email and !item.purchased}" class="text-center mt-5">
+        <form th:action="@{'/auction-item/' + ${item.id} + '/confirm-purchase'}" method="post">
+            <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg">구매 확정</button>
         </form>
     </div>
 

@@ -63,15 +63,6 @@ public class BidController {
         }
     }
 
-    /**
-     * 입찰 처리 (포인트 차감 및 기존 최고 입찰자 포인트 환불)
-     *
-     * @param userDetails 로그인한 사용자 정보
-     * @param auctionItemId 경매 상품 ID
-     * @param bidAmount 사용자가 입력한 입찰 금액
-     * @param model 템플릿에 전달할 모델 객체
-     * @return 상품 상세 페이지로 리디렉션 또는 오류 페이지
-     */
     @PostMapping("/bid")
     public String placeBid(@AuthenticationPrincipal UserDetails userDetails,
                            @RequestParam("auctionItemId") Long auctionItemId,
@@ -79,9 +70,10 @@ public class BidController {
                            Model model) {
 
         if (userDetails == null) {
-            return "redirect:/login";
+            return "redirect:/login"; // 로그인하지 않은 경우 로그인 페이지로 이동
         }
 
+        // 사용자 정보 가져오기
         Optional<User> userOptional = userRepository.findByEmail(userDetails.getUsername());
         Optional<AuctionItem> auctionItemOptional = auctionItemRepository.findById(auctionItemId);
 
@@ -97,30 +89,33 @@ public class BidController {
         Bid highestBid = bidRepository.findTopByAuctionItemOrderByBidAmountDesc(auctionItem);
         int currentHighestBid = (highestBid != null) ? highestBid.getBidAmount() : auctionItem.getStartPrice();
 
+        // 입력된 입찰 금액이 현재 최고가보다 높은지 확인
         if (bidAmount <= currentHighestBid) {
             model.addAttribute("errorMessage", "입찰 금액은 현재 최고 입찰가보다 높아야 합니다.");
             return "error";
         }
 
+        // 사용자의 포인트가 충분한지 확인
         if (bidder.getPoints() < bidAmount) {
             model.addAttribute("errorMessage", "보유 포인트가 부족합니다.");
             return "error";
         }
 
-        // 이전 최고 입찰자의 포인트 환불
+        // ✅ 이전 최고 입찰자의 포인트 환불 (있을 경우)
         if (highestBid != null) {
             User previousBidder = highestBid.getBidder();
             previousBidder.setPoints(previousBidder.getPoints() + highestBid.getBidAmount());
             userRepository.save(previousBidder);
         }
 
-        // 새로운 입찰 진행 (포인트 차감)
+        // ✅ 새로운 입찰 진행 (포인트 차감)
         bidder.setPoints(bidder.getPoints() - bidAmount);
         userRepository.save(bidder);
 
+        // ✅ 새로운 입찰 저장
         Bid newBid = new Bid(bidder, auctionItem, bidAmount);
         bidRepository.save(newBid);
 
-        return "redirect:/auction-item/" + auctionItemId;
+        return "redirect:/auction-item/" + auctionItemId; // 입찰 후 상품 상세 페이지로 이동
     }
 }

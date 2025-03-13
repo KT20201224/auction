@@ -6,6 +6,7 @@ import com.auction.domain.User;
 import com.auction.repository.AuctionItemRepository;
 import com.auction.repository.BidRepository;
 import com.auction.repository.UserRepository;
+import com.auction.service.AuctionItemService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -26,13 +27,15 @@ import java.util.Optional;
 public class AuctionItemController {
 
     private final AuctionItemRepository auctionItemRepository;
+    private final AuctionItemService auctionItemService;
     private final UserRepository userRepository;
     private final BidRepository bidRepository;
 
-    public AuctionItemController(AuctionItemRepository auctionItemRepository, UserRepository userRepository, BidRepository bidRepository) {
+    public AuctionItemController(AuctionItemRepository auctionItemRepository, UserRepository userRepository, BidRepository bidRepository, AuctionItemService auctionItemService) {
         this.auctionItemRepository = auctionItemRepository;
         this.userRepository = userRepository;
         this.bidRepository = bidRepository;
+        this.auctionItemService = auctionItemService;
     }
 
     /**
@@ -118,5 +121,47 @@ public class AuctionItemController {
         }
 
         return "auction-item-detail";
+    }
+
+    @GetMapping("/auction-won")
+    public String auctionWon(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        Optional<User> userOptional = userRepository.findByEmail(userDetails.getUsername());
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            List<AuctionItem> wonItems = auctionItemRepository.findByWinnerNotNullOrderByEndTimeDesc();
+            model.addAttribute("wonItems", wonItems);
+            return "auction-won";
+        }
+
+        return "error";
+    }
+
+    /**
+     * 🔹 구매 확정 요청 처리
+     */
+    @PostMapping("/auction-item/{id}/confirm-purchase")
+    public String confirmPurchase(@PathVariable Long id, @AuthenticationPrincipal UserDetails userDetails, Model model) {
+        if (userDetails == null) {
+            return "redirect:/login";
+        }
+
+        Optional<User> userOptional = userRepository.findByEmail(userDetails.getUsername());
+        if (userOptional.isEmpty()) {
+            model.addAttribute("errorMessage", "사용자 정보를 찾을 수 없습니다.");
+            return "error";
+        }
+
+        User buyer = userOptional.get();
+        try {
+            auctionItemService.confirmPurchase(id, buyer);
+            return "redirect:/auction-item/" + id; // 구매 확정 후 상품 상세 페이지 이동
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            return "error";
+        }
     }
 }

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>낙찰된 상품</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+<div class="container mx-auto mt-10 text-center">
+    <h1 class="text-3xl font-bold text-gray-800">낙찰된 상품</h1>
+
+    <!-- 낙찰된 상품이 없는 경우 -->
+    <p th:if="${#lists.isEmpty(wonItems)}" class="text-gray-700 mt-4">
+        아직 낙찰된 상품이 없습니다.
+    </p>
+
+    <!-- 낙찰된 상품 목록 -->
+    <table th:if="${not #lists.isEmpty(wonItems)}"
+           class="w-3/4 mx-auto mt-6 border-collapse border border-gray-400">
+        <thead>
+        <tr class="bg-gray-200">
+            <th class="border border-gray-400 px-6 py-4 text-lg">상품명</th>
+            <th class="border border-gray-400 px-6 py-4 text-lg">낙찰 가격</th>
+            <th class="border border-gray-400 px-6 py-4 text-lg">마감 시간</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${wonItems}">
+            <td class="border border-gray-400 px-6 py-4 text-lg" th:text="${item.name}"></td>
+            <td class="border border-gray-400 px-6 py-4 text-lg" th:text="${item.winner.name}"></td>
+            <td class="border border-gray-400 px-6 py-4 text-lg" th:text="${#temporals.format(item.endTime, 'yyyy년 MM월 dd일 HH:mm:ss')}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
