@@ -15,4 +15,8 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
     Bid findTopByAuctionItemOrderByBidAmountDesc(AuctionItem auctionItem);
 
     List<Bid> findByBidder(User bidder); // ✅ 특정 사용자가 입찰한 상품 조회 (추가)
+    /**
+     * 특정 경매 상품의 모든 입찰 내역 삭제
+     */
+    void deleteByAuctionItem(AuctionItem auctionItem);
 }

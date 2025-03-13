@@ -2,6 +2,7 @@ package com.auction.security;
 
 import com.auction.domain.User;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
@@ -20,7 +21,10 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList(); // 기본적으로 권한 없음
+        if (user.isAdmin()) {
+            return Collections.singletonList(new SimpleGrantedAuthority("ADMIN")); // ✅ 관리자 권한 추가
+        }
+        return Collections.emptyList(); // 일반 사용자는 권한 없음
     }
 
     @Override
@@ -50,6 +54,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return !user.isBanned(); // ✅ 정지된 사용자는 로그인 불가능
     }
+
 }

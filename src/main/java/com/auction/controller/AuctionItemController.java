@@ -41,13 +41,23 @@ public class AuctionItemController {
     }
 
     /**
-     * 경매 상품 목록 페이지
+     * 경매 상품 목록 페이지 (검색 기능 포함)
+     * @param search 검색어 (선택)
+     * @param model 템플릿에 전달할 모델 객체
+     * @return 경매 상품 목록 페이지
      */
     @GetMapping("/auction-items")
-    public String auctionItems(Model model) {
-        List<AuctionItem> items = auctionItemRepository.findAllByOrderByEndTimeAsc();
+    public String auctionItems(@RequestParam(value = "search", required = false) String search, Model model) {
+        List<AuctionItem> items;
 
-        // 각 경매 상품의 최고 입찰가 조회
+        if (search != null && !search.trim().isEmpty()) {
+            items = auctionItemRepository.findByNameContainingIgnoreCaseOrderByEndTimeAsc(search);
+            model.addAttribute("searchKeyword", search); // 검색어를 모델에 추가
+        } else {
+            items = auctionItemRepository.findAllByOrderByEndTimeAsc();
+        }
+
+        // ✅ 각 경매 상품의 최고 입찰가 조회 (기존 기능 유지)
         Map<Long, Integer> highestBids = new HashMap<>();
         for (AuctionItem item : items) {
             Bid highestBid = bidRepository.findTopByAuctionItemOrderByBidAmountDesc(item);

@@ -40,7 +40,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/", "/register", "/login", "/css/**", "/js/**").permitAll() // 비로그인 접근 허용
-                        .requestMatchers("/dashboard", "/charge", "charge-history").authenticated() // 로그인한 사용자만 접근 가능
+                        .requestMatchers("/dashboard", "/charge", "charge-history", "/mypage").authenticated() // 로그인한 사용자만 접근 가능
+                        .requestMatchers("/admin/**").hasAnyAuthority("ADMIN") // ✅ 관리자 페이지는 ADMIN 권한 필요
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form

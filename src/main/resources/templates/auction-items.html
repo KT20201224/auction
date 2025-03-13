@@ -18,6 +18,17 @@
     </div>
 </nav>
 
+<!-- ✅ 검색 입력창 -->
+<div class="container mx-auto mt-6 p-4 bg-white shadow-md rounded-lg">
+    <form action="/auction-items" method="get" class="flex justify-center">
+        <input type="text" name="search" th:value="${searchKeyword}"
+               placeholder="상품명 검색..." class="p-2 border border-gray-300 rounded-lg w-1/2">
+        <button type="submit" class="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg">검색</button>
+    </form>
+</div>
+
+
+<!-- ✅ 상품 목록 -->
 <div class="container mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
     <h1 class="text-2xl font-bold mb-4">진행 중인 경매</h1>
 

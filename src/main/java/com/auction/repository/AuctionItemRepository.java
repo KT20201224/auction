@@ -26,4 +26,7 @@ public interface AuctionItemRepository extends JpaRepository<AuctionItem, Long> 
      */
     List<AuctionItem> findByWinner(User winner);
 
+    // ✅ 추가: 상품명을 기준으로 검색 (대소문자 구분 없이 포함된 문자열 검색)
+    List<AuctionItem> findByNameContainingIgnoreCaseOrderByEndTimeAsc(String name);
+
 }

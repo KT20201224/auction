@@ -30,4 +30,10 @@ public class User {
 
     @Column(nullable = false)
     private int points = 0; // 기본 포인트 (초기값 0)
+
+    @Column(nullable = false)
+    private boolean isAdmin = false; // 관리자 여부 (기본값: 일반 사용자)
+
+    @Column(nullable = false)
+    private boolean isBanned = false; // 정지된 사용자 여부 (기본값: false)
 }
