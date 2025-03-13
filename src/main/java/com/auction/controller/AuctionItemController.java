@@ -1,8 +1,10 @@
 package com.auction.controller;
 
 import com.auction.domain.AuctionItem;
+import com.auction.domain.Bid;
 import com.auction.domain.User;
 import com.auction.repository.AuctionItemRepository;
+import com.auction.repository.BidRepository;
 import com.auction.repository.UserRepository;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,10 +27,12 @@ public class AuctionItemController {
 
     private final AuctionItemRepository auctionItemRepository;
     private final UserRepository userRepository;
+    private final BidRepository bidRepository;
 
-    public AuctionItemController(AuctionItemRepository auctionItemRepository, UserRepository userRepository) {
+    public AuctionItemController(AuctionItemRepository auctionItemRepository, UserRepository userRepository, BidRepository bidRepository) {
         this.auctionItemRepository = auctionItemRepository;
         this.userRepository = userRepository;
+        this.bidRepository = bidRepository;
     }
 
     /**
@@ -85,20 +89,34 @@ public class AuctionItemController {
     }
 
     /**
-     * 경매 상품 상세 페이지
-     * @param id 상품 ID
+     * 특정 경매 상품 상세 조회
+     *
+     * @param id 경매 상품 ID
      * @param model 템플릿에 전달할 모델 객체
-     * @return 경매 상품 상세 페이지 (auction-item-detail.html) 또는 오류 페이지
+     * @return 경매 상품 상세 페이지
      */
     @GetMapping("/auction-item/{id}")
-    public String auctionItemDetail(@PathVariable Long id, Model model) {
-        Optional<AuctionItem> item = auctionItemRepository.findById(id);
-        if (item.isPresent()) {
-            model.addAttribute("item", item.get());
-            return "auction-item-detail";
-        } else {
+    public String auctionItemDetail(@PathVariable Long id, Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        Optional<AuctionItem> itemOptional = auctionItemRepository.findById(id);
+        if (itemOptional.isEmpty()) {
             model.addAttribute("errorMessage", "해당 상품을 찾을 수 없습니다.");
             return "error";
         }
+
+        AuctionItem item = itemOptional.get();
+        model.addAttribute("item", item);
+
+        // 최고 입찰가 조회
+        Bid highestBid = bidRepository.findTopByAuctionItemOrderByBidAmountDesc(item);
+        int highestBidAmount = (highestBid != null) ? highestBid.getBidAmount() : item.getStartPrice();
+        model.addAttribute("highestBidAmount", highestBidAmount);
+
+        // 로그인한 사용자 정보 추가
+        if (userDetails != null) {
+            Optional<User> userOptional = userRepository.findByEmail(userDetails.getUsername());
+            userOptional.ifPresent(user -> model.addAttribute("user", user));
+        }
+
+        return "auction-item-detail";
     }
 }

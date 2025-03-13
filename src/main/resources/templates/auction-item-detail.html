@@ -16,9 +16,20 @@
         <p class="text-xl font-semibold text-gray-800 mt-2">마감 시간: <span th:text="${#temporals.format(item.endTime, 'yyyy년 MM월 dd일 HH:mm')}"></span></p>
     </div>
 
-    <!-- 현재 최고 입찰가 (입찰 기능 추가 후 적용 예정) -->
+    <!-- 현재 최고 입찰가 표시 -->
     <div class="mt-6">
-        <p class="text-xl font-semibold text-red-600">현재 최고 입찰가: <span id="currentBid">-</span> P</p>
+        <p class="text-xl font-semibold text-red-600">
+            현재 최고 입찰가: <span th:text="${highestBidAmount} + ' P'"></span>
+        </p>
+    </div>
+
+    <!-- 로그인한 사용자의 보유 포인트 표시 -->
+    <div class="mt-6">
+        <p class="text-lg font-semibold text-gray-800">보유 포인트:
+            <span th:if="${#authorization.expression('isAuthenticated()') and user != null and user.points != null}"
+                  th:text="${user.points} + ' P'"></span>
+            <span th:unless="${#authorization.expression('isAuthenticated()') or user == null or user.points == null}">0 P</span>
+        </p>
     </div>
 
     <!-- 입찰 기능 추가 공간 -->
@@ -34,6 +45,7 @@
 
     <!-- 페이지 이동 버튼 -->
     <div class="mt-6">
+        <a th:href="@{/auction-item/{id}/bids(id=${item.id})}" class="px-4 py-2 bg-green-600 text-white rounded-lg">입찰 내역 보기</a>
         <a href="/auction-items" class="px-4 py-2 bg-gray-500 text-white rounded-lg">경매 상품 목록</a>
         <a href="/dashboard" class="px-4 py-2 bg-yellow-500 text-white rounded-lg ml-2">대시보드</a>
     </div>

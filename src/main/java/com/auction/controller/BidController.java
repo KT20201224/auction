@@ -10,9 +10,12 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -25,6 +28,13 @@ public class BidController {
     private final AuctionItemRepository auctionItemRepository;
     private final UserRepository userRepository;
 
+    /**
+     * BidController 생성자
+     *
+     * @param bidRepository 입찰 리포지토리
+     * @param auctionItemRepository 경매 상품 리포지토리
+     * @param userRepository 사용자 리포지토리
+     */
     public BidController(BidRepository bidRepository, AuctionItemRepository auctionItemRepository, UserRepository userRepository) {
         this.bidRepository = bidRepository;
         this.auctionItemRepository = auctionItemRepository;
@@ -32,7 +42,35 @@ public class BidController {
     }
 
     /**
-     * 입찰 처리
+     * 특정 경매 상품의 입찰 내역 조회
+     *
+     * @param id 경매 상품 ID
+     * @param model 템플릿에 전달할 모델 객체
+     * @return 입찰 내역 페이지 (bid-list.html) 또는 오류 페이지
+     */
+    @GetMapping("/auction-item/{id}/bids")
+    public String viewBids(@PathVariable Long id, Model model) {
+        Optional<AuctionItem> auctionItemOptional = auctionItemRepository.findById(id);
+        if (auctionItemOptional.isPresent()) {
+            AuctionItem auctionItem = auctionItemOptional.get();
+            List<Bid> bidList = bidRepository.findByAuctionItemOrderByBidAmountDesc(auctionItem);
+            model.addAttribute("auctionItem", auctionItem);
+            model.addAttribute("bidList", bidList);
+            return "bid-list";
+        } else {
+            model.addAttribute("errorMessage", "해당 상품을 찾을 수 없습니다.");
+            return "error";
+        }
+    }
+
+    /**
+     * 입찰 처리 (포인트 차감 및 기존 최고 입찰자 포인트 환불)
+     *
+     * @param userDetails 로그인한 사용자 정보
+     * @param auctionItemId 경매 상품 ID
+     * @param bidAmount 사용자가 입력한 입찰 금액
+     * @param model 템플릿에 전달할 모델 객체
+     * @return 상품 상세 페이지로 리디렉션 또는 오류 페이지
      */
     @PostMapping("/bid")
     public String placeBid(@AuthenticationPrincipal UserDetails userDetails,
@@ -64,10 +102,25 @@ public class BidController {
             return "error";
         }
 
-        // 새로운 입찰 저장
+        if (bidder.getPoints() < bidAmount) {
+            model.addAttribute("errorMessage", "보유 포인트가 부족합니다.");
+            return "error";
+        }
+
+        // 이전 최고 입찰자의 포인트 환불
+        if (highestBid != null) {
+            User previousBidder = highestBid.getBidder();
+            previousBidder.setPoints(previousBidder.getPoints() + highestBid.getBidAmount());
+            userRepository.save(previousBidder);
+        }
+
+        // 새로운 입찰 진행 (포인트 차감)
+        bidder.setPoints(bidder.getPoints() - bidAmount);
+        userRepository.save(bidder);
+
         Bid newBid = new Bid(bidder, auctionItem, bidAmount);
         bidRepository.save(newBid);
 
-        return "redirect:/auction-item/" + auctionItemId; // 입찰 후 상품 상세 페이지로 이동
+        return "redirect:/auction-item/" + auctionItemId;
     }
 }
