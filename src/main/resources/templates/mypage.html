@@ -7,60 +7,97 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-<nav class="bg-blue-600 p-4 text-white flex justify-between">
+
+<!-- ✅ 네비게이션 바 -->
+<nav class="bg-blue-600 p-4 text-white flex justify-between items-center">
     <a href="/" class="text-xl font-bold">경매 웹서비스</a>
-    <a href="/logout" class="px-3 py-2 bg-red-500 text-white rounded-lg">로그아웃</a>
+    <div class="flex space-x-2">
+        <a href="/auction-item/new" class="px-3 py-2 bg-green-500 text-white rounded-lg">상품 등록</a>
+        <a href="/mypage" class="px-3 py-2 bg-yellow-500 text-white rounded-lg">마이페이지</a>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="px-3 py-2 bg-red-500 text-white rounded-lg">로그아웃</button>
+        </form>
+    </div>
 </nav>
 
+<!-- ✅ 마이페이지 본문 -->
 <div class="container mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
-    <h1 class="text-2xl font-bold mb-4">마이페이지</h1>
+    <h1 class="text-2xl font-bold text-gray-800">👤 마이페이지</h1>
 
-    <div class="mb-6">
-        <p class="text-lg"><strong>이메일:</strong> <span th:text="${user.email}"></span></p>
-        <p class="text-lg"><strong>이름:</strong> <span th:text="${user.name}"></span></p>
-        <p class="text-lg"><strong>보유 포인트:</strong> <span th:text="${user.points}"></span> P</p>
+    <p class="text-gray-700 mt-2"><strong>이메일:</strong> <span th:text="${email}"></span></p>
+    <p class="text-gray-700 mt-2"><strong>보유 포인트:</strong> <span th:text="${points}"></span>P</p>
+
+    <!-- ✅ 포인트 관련 버튼 -->
+    <div class="mt-6 flex justify-center space-x-4">
+        <a href="/charge-history" class="px-4 py-3 bg-blue-500 text-white rounded-lg text-lg">📜 포인트 충전 내역</a>
+        <a href="/charge" class="px-4 py-3 bg-green-500 text-white rounded-lg text-lg">💰 포인트 충전하기</a>
     </div>
 
-    <h2 class="text-xl font-bold mt-6">내가 등록한 경매 상품</h2>
+    <!-- ✅ 등록한 상품 목록 (테이블 형식) -->
+    <h2 class="text-xl font-bold text-gray-800 mt-6">📦 내가 등록한 경매 상품</h2>
     <table class="w-full mt-2 border-collapse border border-gray-300">
-        <thead>
-        <tr class="bg-gray-200">
-            <th class="border p-2">상품명</th>
-            <th class="border p-2">시작 가격</th>
-            <th class="border p-2">마감 시간</th>
+        <thead class="bg-gray-200">
+        <tr>
+            <th class="border border-gray-300 px-4 py-2">상품명</th>
+            <th class="border border-gray-300 px-4 py-2">현재 입찰가</th>
+            <th class="border border-gray-300 px-4 py-2">마감 시간</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="item : ${myAuctionItems}">
-            <td class="border p-2"><a th:href="@{/auction-item/{id}(id=${item.id})}" th:text="${item.name}"></a></td>
-            <td class="border p-2" th:text="${item.startPrice}"></td>
-            <td class="border p-2" th:text="${#temporals.format(item.endTime, 'yyyy-MM-dd HH:mm')}"></td>
+            <td class="border border-gray-300 px-4 py-2">
+                <a th:href="@{/auction-item/{id}(id=${item.id})}" class="text-blue-600 underline" th:text="${item.name}"></a>
+            </td>
+            <td class="border border-gray-300 px-4 py-2" th:text="${highestBids[item.id]} + 'P'"></td>
+            <td class="border border-gray-300 px-4 py-2" th:text="${#temporals.format(item.endTime, 'yyyy-MM-dd HH:mm')}"></td>
         </tr>
         </tbody>
     </table>
 
-    <h2 class="text-xl font-bold mt-6">내가 낙찰받은 상품</h2>
+    <!-- ✅ 내가 참여 중인 경매 상품 목록 -->
+    <h2 class="text-xl font-bold text-gray-800 mt-6">⚡ 진행 중인 경매 상품</h2>
     <table class="w-full mt-2 border-collapse border border-gray-300">
-        <thead>
-        <tr class="bg-gray-200">
-            <th class="border p-2">상품명</th>
-            <th class="border p-2">낙찰 가격</th>
-            <th class="border p-2">구매 확정</th>
+        <thead class="bg-gray-200">
+        <tr>
+            <th class="border border-gray-300 px-4 py-2">상품명</th>
+            <th class="border border-gray-300 px-4 py-2">현재 입찰가</th>
+            <th class="border border-gray-300 px-4 py-2">마감 시간</th>
         </tr>
         </thead>
         <tbody>
-        <tr th:each="item : ${myWinningBids}">
-            <td class="border p-2"><a th:href="@{/auction-item/{id}(id=${item.id})}" th:text="${item.name}"></a></td>
-            <td class="border p-2" th:text="${item.startPrice}"></td>
-            <td class="border p-2">
-                <span th:if="${item.purchased}" class="text-green-500 font-bold">구매 완료</span>
-                <form th:if="${!item.purchased}" th:action="@{/auction-item/{id}/confirm-purchase(id=${item.id})}" method="post">
-                    <button type="submit" class="px-3 py-1 bg-blue-500 text-white rounded-lg">구매 확정</button>
-                </form>
+        <tr th:each="item : ${participatingAuctionItems}">
+            <td class="border border-gray-300 px-4 py-2">
+                <a th:href="@{/auction-item/{id}(id=${item.id})}" class="text-blue-600 underline" th:text="${item.name}"></a>
             </td>
+            <td class="border border-gray-300 px-4 py-2" th:text="${highestBids[item.id]} + 'P'"></td>
+            <td class="border border-gray-300 px-4 py-2" th:text="${#temporals.format(item.endTime, 'yyyy-MM-dd HH:mm')}"></td>
         </tr>
         </tbody>
     </table>
+
+    <!-- ✅ 낙찰받은 상품 목록 (테이블 형식) -->
+    <h2 class="text-xl font-bold text-gray-800 mt-6">🏆 내가 낙찰받은 상품</h2>
+    <table class="w-full mt-2 border-collapse border border-gray-300">
+        <thead class="bg-gray-200">
+        <tr>
+            <th class="border border-gray-300 px-4 py-2">상품명</th>
+            <th class="border border-gray-300 px-4 py-2">낙찰 가격</th>
+            <th class="border border-gray-300 px-4 py-2">마감 시간</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${wonAuctionItems}">
+            <td class="border border-gray-300 px-4 py-2">
+                <a th:href="@{/auction-item/{id}(id=${item.id})}" class="text-blue-600 underline" th:text="${item.name}"></a>
+            </td>
+            <td class="border border-gray-300 px-4 py-2" th:text="${highestBids[item.id]} + 'P'"></td>
+            <td class="border border-gray-300 px-4 py-2" th:text="${#temporals.format(item.endTime, 'yyyy-MM-dd HH:mm')}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+
 </div>
+
 </body>
 </html>

@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -40,13 +42,21 @@ public class AuctionItemController {
 
     /**
      * 경매 상품 목록 페이지
-     * @param model 템플릿에 전달할 모델 객체
-     * @return 경매 상품 목록 페이지 (auction-items.html)
      */
     @GetMapping("/auction-items")
     public String auctionItems(Model model) {
         List<AuctionItem> items = auctionItemRepository.findAllByOrderByEndTimeAsc();
+
+        // 각 경매 상품의 최고 입찰가 조회
+        Map<Long, Integer> highestBids = new HashMap<>();
+        for (AuctionItem item : items) {
+            Bid highestBid = bidRepository.findTopByAuctionItemOrderByBidAmountDesc(item);
+            int bidAmount = (highestBid != null) ? highestBid.getBidAmount() : item.getStartPrice();
+            highestBids.put(item.getId(), bidAmount);
+        }
+
         model.addAttribute("items", items);
+        model.addAttribute("highestBids", highestBids);
         return "auction-items";
     }
 
@@ -114,30 +124,17 @@ public class AuctionItemController {
         int highestBidAmount = (highestBid != null) ? highestBid.getBidAmount() : item.getStartPrice();
         model.addAttribute("highestBidAmount", highestBidAmount);
 
-        // 로그인한 사용자 정보 추가
+        // 로그인한 사용자 정보 추가 (보유 포인트 포함)
         if (userDetails != null) {
             Optional<User> userOptional = userRepository.findByEmail(userDetails.getUsername());
-            userOptional.ifPresent(user -> model.addAttribute("user", user));
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                model.addAttribute("user", user);
+                model.addAttribute("userPoints", user.getPoints()); // ✅ 사용자 보유 포인트 추가
+            }
         }
 
         return "auction-item-detail";
-    }
-
-    @GetMapping("/auction-won")
-    public String auctionWon(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return "redirect:/login";
-        }
-
-        Optional<User> userOptional = userRepository.findByEmail(userDetails.getUsername());
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            List<AuctionItem> wonItems = auctionItemRepository.findByWinnerNotNullOrderByEndTimeDesc();
-            model.addAttribute("wonItems", wonItems);
-            return "auction-won";
-        }
-
-        return "error";
     }
 
     /**

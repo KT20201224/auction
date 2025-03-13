@@ -3,68 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>경매 상품 상세</title>
+    <title>경매 상세 정보</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-<div class="container mx-auto mt-10 text-center">
-    <h1 class="text-3xl font-bold text-gray-800" th:text="${item.name}"></h1>
-    <p class="text-gray-700 mt-4" th:text="${item.description}"></p>
 
-    <div class="mt-6">
-        <p class="text-xl font-semibold text-gray-800">시작 가격: <span th:text="${item.startPrice} + ' P'"></span></p>
-        <p class="text-xl font-semibold text-gray-800 mt-2">마감 시간: <span th:text="${#temporals.format(item.endTime, 'yyyy년 MM월 dd일 HH:mm')}"></span></p>
+<!-- ✅ 네비게이션 바 -->
+<nav class="bg-blue-600 p-4 text-white flex justify-between items-center">
+    <a href="/" class="text-xl font-bold">경매 웹서비스</a>
+    <div class="flex space-x-2">
+        <a href="/mypage" class="px-3 py-2 bg-yellow-500 text-white rounded-lg">마이페이지</a>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="px-3 py-2 bg-red-500 text-white rounded-lg">로그아웃</button>
+        </form>
     </div>
+</nav>
 
-    <!-- 현재 최고 입찰가 표시 -->
-    <div class="mt-6">
-        <p class="text-xl font-semibold text-red-600">
-            현재 최고 입찰가: <span th:text="${highestBidAmount} + ' P'"></span>
-        </p>
-    </div>
+<!-- ✅ 본문 -->
+<div class="container mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+    <h1 class="text-2xl font-bold text-gray-800" th:text="${item.name}"></h1>
+    <p class="text-gray-600 mt-2" th:text="${item.description}"></p>
 
-    <!-- 로그인한 사용자의 보유 포인트 표시 -->
-    <div class="mt-6">
-        <p class="text-lg font-semibold text-gray-800">보유 포인트:
-            <span th:if="${#authorization.expression('isAuthenticated()') and user != null and user.points != null}"
-                  th:text="${user.points} + ' P'"></span>
-            <span th:unless="${#authorization.expression('isAuthenticated()') or user == null or user.points == null}">0 P</span>
-        </p>
-    </div>
+    <!-- ✅ 현재 최고 입찰가 -->
+    <p class="text-lg font-bold text-red-600 mt-2">
+        현재 최고 입찰가: <span th:text="${highestBidAmount}"></span>P
+    </p>
 
-    <!-- 경매 상태 표시 -->
-    <div class="mt-6">
-        <p class="text-xl font-semibold"
-           th:classappend="${item.auctionEnded} ? 'text-red-600' : 'text-green-600'">
-            <span th:if="${item.auctionEnded}">경매 마감됨</span>
-            <span th:unless="${item.auctionEnded}">경매 진행 중</span>
-        </p>
-    </div>
+    <!-- ✅ 현재 사용자 보유 포인트 -->
+    <p th:if="${user != null}" class="text-lg font-bold text-green-600 mt-2">
+        내 보유 포인트: <span th:text="${userPoints}"></span>P
+    </p>
 
-    <!-- 입찰하기 폼 (경매가 진행 중인 경우에만 표시) -->
-    <div class="mt-6" th:if="${not item.auctionEnded}">
+    <!-- ✅ 마감 시간 -->
+    <p class="text-gray-500 mt-1">
+        마감 시간: <span th:text="${#temporals.format(item.endTime, 'yyyy-MM-dd HH:mm')}"></span>
+    </p>
+
+    <!-- ✅ 입찰 폼 (경매 진행 중인 경우에만 표시) -->
+    <div th:if="${item.endTime.isAfter(T(java.time.LocalDateTime).now())}" class="mt-6">
         <h2 class="text-xl font-bold text-gray-800">입찰하기</h2>
-        <form method="post" action="/bid">
+        <form th:action="@{/bid}" method="post" class="mt-4">
             <input type="hidden" name="auctionItemId" th:value="${item.id}">
-            <label class="block text-gray-700 mt-4">입찰 금액:</label>
-            <input type="number" name="bidAmount" required class="w-1/4 p-2 border border-gray-300 rounded-lg mt-2">
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg mt-4">입찰하기</button>
-        </form>
-    </div>
+            <label for="bidAmount" class="block text-gray-700 font-medium">입찰 금액 (최소 <span th:text="${highestBidAmount + 1}"></span>P 이상)</label>
+            <input type="number" id="bidAmount" name="bidAmount" class="mt-2 p-2 border border-gray-300 rounded w-full" required>
 
-    <!-- 구매 확정 버튼 (낙찰자인 경우에만 표시) -->
-    <div th:if="${item.winner != null and user != null and item.winner.email == user.email and !item.purchased}" class="text-center mt-5">
-        <form th:action="@{'/auction-item/' + ${item.id} + '/confirm-purchase'}" method="post">
-            <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg">구매 확정</button>
+            <button type="submit" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg">입찰하기</button>
         </form>
-    </div>
-
-    <!-- 페이지 이동 버튼 -->
-    <div class="mt-6">
-        <a th:href="@{/auction-item/{id}/bids(id=${item.id})}" class="px-4 py-2 bg-green-600 text-white rounded-lg">입찰 내역 보기</a>
-        <a href="/auction-items" class="px-4 py-2 bg-gray-500 text-white rounded-lg">경매 상품 목록</a>
-        <a href="/dashboard" class="px-4 py-2 bg-yellow-500 text-white rounded-lg ml-2">대시보드</a>
     </div>
 </div>
+
 </body>
 </html>
