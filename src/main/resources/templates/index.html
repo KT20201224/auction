@@ -13,6 +13,7 @@
         <a href="/auction-items" class="px-3 py-2 bg-gray-500 text-white rounded-lg">경매 상품 목록</a>
         <a th:if="${userName != null}" href="/auction-item/new" class="px-3 py-2 bg-green-500 text-white rounded-lg ml-2">상품 등록</a>
 
+        <a th:if="${userName != null}" href="/mypage" class="px-3 py-2 bg-yellow-500 text-white rounded-lg">마이페이지</a>
         <a th:if="${userName != null}" href="/dashboard" class="px-3 py-2 bg-green-500 text-white rounded-lg">대시보드</a>
         <a th:if="${userName != null}" href="/logout" class="px-3 py-2 bg-red-500 text-white rounded-lg">로그아웃</a>
 

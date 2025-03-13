@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+<nav class="bg-blue-600 p-4 text-white flex justify-between">
+    <a href="/" class="text-xl font-bold">경매 웹서비스</a>
+    <a href="/logout" class="px-3 py-2 bg-red-500 text-white rounded-lg">로그아웃</a>
+</nav>
+
+<div class="container mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+    <h1 class="text-2xl font-bold mb-4">마이페이지</h1>
+
+    <div class="mb-6">
+        <p class="text-lg"><strong>이메일:</strong> <span th:text="${user.email}"></span></p>
+        <p class="text-lg"><strong>이름:</strong> <span th:text="${user.name}"></span></p>
+        <p class="text-lg"><strong>보유 포인트:</strong> <span th:text="${user.points}"></span> P</p>
+    </div>
+
+    <h2 class="text-xl font-bold mt-6">내가 등록한 경매 상품</h2>
+    <table class="w-full mt-2 border-collapse border border-gray-300">
+        <thead>
+        <tr class="bg-gray-200">
+            <th class="border p-2">상품명</th>
+            <th class="border p-2">시작 가격</th>
+            <th class="border p-2">마감 시간</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${myAuctionItems}">
+            <td class="border p-2"><a th:href="@{/auction-item/{id}(id=${item.id})}" th:text="${item.name}"></a></td>
+            <td class="border p-2" th:text="${item.startPrice}"></td>
+            <td class="border p-2" th:text="${#temporals.format(item.endTime, 'yyyy-MM-dd HH:mm')}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h2 class="text-xl font-bold mt-6">내가 낙찰받은 상품</h2>
+    <table class="w-full mt-2 border-collapse border border-gray-300">
+        <thead>
+        <tr class="bg-gray-200">
+            <th class="border p-2">상품명</th>
+            <th class="border p-2">낙찰 가격</th>
+            <th class="border p-2">구매 확정</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${myWinningBids}">
+            <td class="border p-2"><a th:href="@{/auction-item/{id}(id=${item.id})}" th:text="${item.name}"></a></td>
+            <td class="border p-2" th:text="${item.startPrice}"></td>
+            <td class="border p-2">
+                <span th:if="${item.purchased}" class="text-green-500 font-bold">구매 완료</span>
+                <form th:if="${!item.purchased}" th:action="@{/auction-item/{id}/confirm-purchase(id=${item.id})}" method="post">
+                    <button type="submit" class="px-3 py-1 bg-blue-500 text-white rounded-lg">구매 확정</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

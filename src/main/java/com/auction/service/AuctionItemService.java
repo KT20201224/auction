@@ -87,4 +87,27 @@ public class AuctionItemService {
             throw new IllegalArgumentException("경매 상품을 찾을 수 없습니다.");
         }
     }
+
+    /**
+     * 특정 판매자가 등록한 경매 상품 목록 조회
+     *
+     * @param seller 판매자
+     * @return 판매자가 등록한 상품 목록
+     */
+    @Transactional(readOnly = true)
+    public List<AuctionItem> getAuctionItemsBySeller(User seller) {
+        return auctionItemRepository.findBySeller(seller);
+    }
+
+    /**
+     * 특정 사용자가 낙찰받은 상품 목록 조회
+     *
+     * @param winner 낙찰자
+     * @return 낙찰받은 상품 목록
+     */
+    @Transactional(readOnly = true)
+    public List<AuctionItem> getAuctionItemsByWinner(User winner) {
+        return auctionItemRepository.findByWinner(winner);
+    }
+
 }
