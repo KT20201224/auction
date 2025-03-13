@@ -50,6 +50,14 @@
             <button type="submit" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg">입찰하기</button>
         </form>
     </div>
+    <!-- ✅ 구매 확정 버튼 (낙찰자만 확인 가능) -->
+    <div th:if="${item.winner != null and item.winner.email == #authentication.name and !item.purchased}" class="mt-4">
+        <form th:action="@{/auction-item/{id}/confirm-purchase(id=${item.id})}" method="post">
+            <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg">
+                ✅ 구매 확정하기
+            </button>
+        </form>
+    </div>
 </div>
 
 </body>

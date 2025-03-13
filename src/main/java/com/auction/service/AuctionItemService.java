@@ -48,44 +48,40 @@ public class AuctionItemService {
         }
     }
 
-    /**
-     * 🔹 낙찰자가 상품 구매 확정
-     *
-     * @param auctionItemId 경매 상품 ID
-     * @param buyer 낙찰자
-     */
     @Transactional
-    public void confirmPurchase(Long auctionItemId, User buyer) {
-        Optional<AuctionItem> auctionItemOptional = auctionItemRepository.findById(auctionItemId);
+    public void confirmPurchase(Long itemId, User buyer) {
+        AuctionItem auctionItem = auctionItemRepository.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 경매 상품을 찾을 수 없습니다."));
 
-        if (auctionItemOptional.isPresent()) {
-            AuctionItem auctionItem = auctionItemOptional.get();
-
-            // 이미 구매 확정된 상품인지 확인
-            if (auctionItem.isPurchased()) {
-                throw new IllegalStateException("이미 구매 확정된 상품입니다.");
-            }
-
-            // 구매자가 낙찰자인지 확인
-            if (!auctionItem.getWinner().equals(buyer)) {
-                throw new IllegalStateException("이 상품의 낙찰자만 구매 확정할 수 있습니다.");
-            }
-
-            // ✅ 포인트 차감을 제거 (이미 입찰 시 차감되었음)
-            // int finalPrice = auctionItem.getStartPrice();
-            // if (buyer.getPoints() < finalPrice) {
-            //    throw new IllegalStateException("포인트가 부족합니다.");
-            // }
-
-            // buyer.setPoints(buyer.getPoints() - finalPrice);
-            // userRepository.save(buyer);
-
-            // 구매 확정 처리
-            auctionItem.confirmPurchase();
-            auctionItemRepository.save(auctionItem);
-        } else {
-            throw new IllegalArgumentException("경매 상품을 찾을 수 없습니다.");
+        if (auctionItem.isPurchased()) {
+            throw new IllegalStateException("이미 구매 확정된 상품입니다.");
         }
+
+        if (!auctionItem.getWinner().equals(buyer)) {
+            throw new IllegalStateException("해당 상품의 낙찰자가 아닙니다.");
+        }
+
+        Bid highestBid = bidRepository.findTopByAuctionItemOrderByBidAmountDesc(auctionItem);
+        if (highestBid == null) {
+            throw new IllegalStateException("유효한 입찰 내역이 없습니다.");
+        }
+
+        int finalPrice = highestBid.getBidAmount();
+        User seller = auctionItem.getSeller();
+
+        // 🚀 디버깅 로그 추가
+        System.out.println("✅ 판매자: " + seller.getEmail() + " / 기존 포인트: " + seller.getPoints());
+        System.out.println("✅ 낙찰 금액: " + finalPrice);
+
+        seller.setPoints(seller.getPoints() + finalPrice);
+        userRepository.save(seller);
+
+        System.out.println("✅ 새로운 판매자 포인트: " + seller.getPoints());
+
+        auctionItem.setPurchased(true);
+        auctionItemRepository.save(auctionItem);
+
+        System.out.println("✅ 구매 확정 완료: " + auctionItem.getName());
     }
 
     /**

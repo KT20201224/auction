@@ -34,7 +34,10 @@ public class HomeController {
     public String home(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         if (userDetails != null) {
             Optional<User> user = userRepository.findByEmail(userDetails.getUsername());
-            user.ifPresent(value -> model.addAttribute("userName", value.getName()));
+            user.ifPresent(value -> {
+                model.addAttribute("userName", value.getName());
+                model.addAttribute("isAdmin", value.isAdmin()); // ✅ 관리자 여부 전달
+            });
         }
 
         // 최근 등록된 3개의 경매 상품 가져오기
