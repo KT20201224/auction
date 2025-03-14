@@ -3,24 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>경매 웹서비스</title>
+    <title>🏆 경매 웹서비스</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-    <!-- 네비게이션 바 -->
-    <nav class="bg-blue-600 p-4 text-white">
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="/" class="text-xl font-bold">경매 웹서비스</a>
-            <div>
-                <a href="/login" class="px-3 py-2 bg-white text-blue-600 rounded-lg">로그인</a>
-                <a href="/register" class="px-3 py-2 ml-2 bg-gray-200 text-blue-600 rounded-lg">회원가입</a>
-            </div>
-        </div>
-    </nav>
 
-    <!-- 본문 내용 -->
-    <div class="container mx-auto mt-10 p-6">
-        <th:block th:insert="~{::content}"></th:block>
+<!-- ✅ 네비게이션 바 -->
+<nav class="bg-blue-600 p-4 text-white">
+    <div class="container mx-auto flex justify-between items-center">
+        <a href="/" class="text-xl font-bold">🏆 경매 웹서비스</a>
+
+        <div>
+            <!-- ✅ 로그인 및 회원가입 버튼 (비로그인 상태에서만 보임) -->
+            <a href="/login" class="px-3 py-2 bg-white text-blue-600 rounded-lg">🔑 로그인</a>
+            <a href="/register" class="px-3 py-2 ml-2 bg-gray-200 text-blue-600 rounded-lg">📝 회원가입</a>
+        </div>
     </div>
+</nav>
+
+<!-- ✅ 본문 내용 (개별 페이지에서 삽입될 위치) -->
+<div class="container mx-auto mt-10 p-6">
+    <th:block th:insert="~{::content}"></th:block>
+</div>
+
 </body>
 </html>

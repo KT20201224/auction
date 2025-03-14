@@ -6,6 +6,8 @@ import com.auction.domain.User;
 import com.auction.repository.AuctionItemRepository;
 import com.auction.repository.BidRepository;
 import com.auction.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -21,10 +23,19 @@ import java.util.stream.Collectors;
 @Controller
 public class MyPageController {
 
+    private static final Logger logger = LoggerFactory.getLogger(MyPageController.class);
+
     private final UserRepository userRepository;
     private final AuctionItemRepository auctionItemRepository;
     private final BidRepository bidRepository;
 
+    /**
+     * MyPageController 생성자
+     *
+     * @param userRepository       사용자 리포지토리
+     * @param auctionItemRepository 경매 상품 리포지토리
+     * @param bidRepository         입찰 리포지토리
+     */
     public MyPageController(UserRepository userRepository, AuctionItemRepository auctionItemRepository, BidRepository bidRepository) {
         this.userRepository = userRepository;
         this.auctionItemRepository = auctionItemRepository;
@@ -33,6 +44,10 @@ public class MyPageController {
 
     /**
      * 마이페이지 조회
+     *
+     * @param userDetails 로그인한 사용자 정보
+     * @param model       템플릿에 전달할 모델 객체
+     * @return 마이페이지 (mypage.html)
      */
     @GetMapping("/mypage")
     public String myPage(@AuthenticationPrincipal UserDetails userDetails, Model model) {
@@ -47,22 +62,21 @@ public class MyPageController {
         }
 
         User user = userOptional.get();
+        logger.info("✅ 마이페이지 접근 - 사용자: {}", user.getEmail());
 
-        // 사용자가 등록한 경매 상품 조회
+        // ✅ 사용자가 등록한 경매 상품 조회
         List<AuctionItem> myAuctionItems = auctionItemRepository.findBySeller(user);
+        logger.info("📦 사용자가 등록한 경매 상품 개수: {}", myAuctionItems.size());
 
-        // 사용자가 낙찰받은 경매 상품 조회
+        // ✅ 사용자가 낙찰받은 경매 상품 조회
         List<AuctionItem> wonAuctionItems = auctionItemRepository.findByWinner(user);
+        logger.info("🏆 사용자가 낙찰받은 경매 상품 개수: {}", wonAuctionItems.size());
 
-        // 사용자가 입찰한 경매 상품 조회 (현재 진행 중인 경매만)
-        List<Bid> userBids = bidRepository.findByBidder(user);
-        List<AuctionItem> participatingAuctionItems = userBids.stream()
-                .map(Bid::getAuctionItem)
-                .filter(item -> item.getWinner() == null) // 낙찰되지 않은 상품만 필터링
-                .distinct()
-                .collect(Collectors.toList());
+        // ✅ 사용자가 입찰한 경매 상품 조회 (현재 진행 중인 경매만)
+        List<AuctionItem> participatingAuctionItems = getParticipatingAuctionItems(user);
+        logger.info("🎯 사용자가 참여한 경매 상품 개수: {}", participatingAuctionItems.size());
 
-        // 각 상품의 현재 최고 입찰가 조회
+        // ✅ 각 상품의 현재 최고 입찰가 조회
         model.addAttribute("highestBids", getHighestBids(myAuctionItems, wonAuctionItems, participatingAuctionItems));
 
         model.addAttribute("email", user.getEmail());
@@ -75,20 +89,34 @@ public class MyPageController {
     }
 
     /**
-     * 각 경매 상품의 최고 입찰가 조회
+     * 사용자가 참여 중인 경매 상품 목록 조회 (입찰했지만 낙찰되지 않은 상품)
+     *
+     * @param user 사용자 객체
+     * @return 사용자가 입찰한 경매 상품 목록
      */
-    private Map<Long, Integer> getHighestBids(List<AuctionItem> myAuctionItems, List<AuctionItem> wonAuctionItems, List<AuctionItem> participatingAuctionItems) {
+    private List<AuctionItem> getParticipatingAuctionItems(User user) {
+        return bidRepository.findByBidder(user).stream()
+                .map(Bid::getAuctionItem)
+                .filter(item -> item.getWinner() == null) // 낙찰되지 않은 상품만 필터링
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 각 경매 상품의 최고 입찰가 조회
+     *
+     * @param auctionItemLists 여러 리스트를 포함하는 경매 상품 목록
+     * @return 경매 상품 ID별 최고 입찰가 매핑
+     */
+    private Map<Long, Integer> getHighestBids(List<AuctionItem>... auctionItemLists) {
         Map<Long, Integer> highestBids = new HashMap<>();
 
-        List<AuctionItem> allItems = new ArrayList<>();
-        allItems.addAll(myAuctionItems);
-        allItems.addAll(wonAuctionItems);
-        allItems.addAll(participatingAuctionItems);
-
-        for (AuctionItem item : allItems) {
-            Bid highestBid = bidRepository.findTopByAuctionItemOrderByBidAmountDesc(item);
-            highestBids.put(item.getId(), highestBid != null ? highestBid.getBidAmount() : item.getStartPrice());
-        }
+        Arrays.stream(auctionItemLists)
+                .flatMap(Collection::stream)
+                .forEach(item -> {
+                    Bid highestBid = bidRepository.findTopByAuctionItemOrderByBidAmountDesc(item);
+                    highestBids.put(item.getId(), highestBid != null ? highestBid.getBidAmount() : item.getStartPrice());
+                });
 
         return highestBids;
     }

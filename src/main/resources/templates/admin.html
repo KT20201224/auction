@@ -7,15 +7,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-<!-- ✅ 네비게이션 바 -->
+
+<!-- ✅ 네비게이션 바 (홈으로 이동) -->
 <nav class="bg-blue-600 p-4 text-white flex justify-between">
     <a href="/" class="text-xl font-bold">경매 웹서비스</a>
 </nav>
 
+<!-- ✅ 관리자 페이지 컨테이너 -->
 <div class="container mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
     <h1 class="text-2xl font-bold mb-4">🔧 관리자 페이지</h1>
 
-    <!-- ✅ 사용자 목록 -->
+    <!-- ✅ 사용자 목록 테이블 -->
     <h2 class="text-xl font-bold mt-4">👤 사용자 목록</h2>
     <table class="w-full mt-2 border-collapse border border-gray-300">
         <thead class="bg-gray-200">
@@ -32,11 +34,13 @@
             <td class="border border-gray-300 px-4 py-2" th:text="${user.name}"></td>
             <td class="border border-gray-300 px-4 py-2" th:text="${user.banned ? '정지됨' : '정상'}"></td>
             <td class="border border-gray-300 px-4 py-2">
+                <!-- ✅ 사용자가 정지되지 않은 경우 "정지" 버튼 표시 -->
                 <form th:action="@{/admin/ban-user}" method="post" th:if="${!user.banned}">
                     <input type="hidden" name="userId" th:value="${user.id}">
                     <button type="submit" class="px-3 py-2 bg-red-500 text-white rounded-lg">정지</button>
                 </form>
 
+                <!-- ✅ 사용자가 정지된 경우 "정지 해제" 버튼 표시 -->
                 <form th:action="@{/admin/unban-user}" method="post" th:if="${user.banned}">
                     <input type="hidden" name="userId" th:value="${user.id}">
                     <button type="submit" class="px-3 py-2 bg-green-500 text-white rounded-lg">정지 해제</button>
@@ -46,7 +50,7 @@
         </tbody>
     </table>
 
-    <!-- ✅ 경매 상품 목록 -->
+    <!-- ✅ 경매 상품 목록 테이블 -->
     <h2 class="text-xl font-bold mt-6">📦 경매 상품 목록</h2>
     <table class="w-full mt-2 border-collapse border border-gray-300">
         <thead class="bg-gray-200">
@@ -59,6 +63,7 @@
         <tr th:each="item : ${items}">
             <td class="border border-gray-300 px-4 py-2" th:text="${item.name}"></td>
             <td class="border border-gray-300 px-4 py-2 text-center">
+                <!-- ✅ 관리자에 의해 경매 상품 삭제 -->
                 <form th:action="@{/admin/delete-item}" method="post">
                     <input type="hidden" name="itemId" th:value="${item.id}">
                     <button type="submit" class="px-3 py-2 bg-red-500 text-white rounded-lg">삭제</button>
@@ -68,5 +73,6 @@
         </tbody>
     </table>
 </div>
+
 </body>
 </html>

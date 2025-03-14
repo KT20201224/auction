@@ -3,14 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>오류 발생</title>
+    <title>🚨 오류 발생</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
+
+<!-- ✅ 오류 페이지 본문 -->
 <div class="container mx-auto mt-10 text-center">
-    <h1 class="text-3xl font-bold text-red-600">오류 발생</h1>
+    <h1 class="text-3xl font-bold text-red-600">⚠ 오류 발생</h1>
     <p class="text-gray-700 mt-4" th:text="${errorMessage}"></p>
-    <a href="/" class="mt-6 block text-blue-600">홈으로 돌아가기</a>
+
+    <!-- ✅ 홈으로 돌아가기 버튼 -->
+    <a href="/" class="mt-6 px-4 py-2 bg-blue-500 text-white rounded-lg inline-block">🏠 홈으로 돌아가기</a>
 </div>
+
 </body>
 </html>

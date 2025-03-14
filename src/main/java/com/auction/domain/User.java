@@ -1,6 +1,7 @@
 package com.auction.domain;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,4 +37,57 @@ public class User {
 
     @Column(nullable = false)
     private boolean isBanned = false; // 정지된 사용자 여부 (기본값: false)
+
+    /**
+     * 🔹 생성자 (회원가입 시 사용)
+     */
+    public User(String email, String password, String name) {
+        this.email = email;
+        this.password = password;
+        this.name = name;
+        this.points = 0;
+        this.isAdmin = false;
+        this.isBanned = false;
+    }
+
+    /**
+     * 🔹 포인트 추가
+     */
+    public void addPoints(int amount) {
+        if (amount > 0) {
+            this.points += amount;
+        }
+    }
+
+    /**
+     * 🔹 포인트 차감
+     */
+    public void subtractPoints(int amount) {
+        if (amount > 0 && this.points >= amount) {
+            this.points -= amount;
+        } else {
+            throw new IllegalArgumentException("포인트가 부족합니다.");
+        }
+    }
+
+    /**
+     * 🔹 관리자 권한 부여
+     */
+    public void grantAdmin() {
+        this.isAdmin = true;
+    }
+
+    /**
+     * 🔹 사용자 정지
+     */
+    public void banUser() {
+        this.isBanned = true;
+    }
+
+    /**
+     * 🔹 사용자 정지 해제
+     */
+    public void unbanUser() {
+        this.isBanned = false;
+    }
 }

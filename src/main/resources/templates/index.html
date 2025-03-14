@@ -3,34 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>경매 웹서비스</title>
+    <title>🏆 경매 웹서비스</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
+
 <!-- ✅ 네비게이션 바 -->
 <nav class="bg-blue-600 p-4 text-white flex justify-between items-center">
-    <a href="/" class="text-xl font-bold">경매 웹서비스</a>
+    <a href="/" class="text-xl font-bold">🏆 경매 웹서비스</a>
 
     <div class="flex space-x-2">
-        <a href="/auction-item/new" class="px-3 py-2 bg-green-500 text-white rounded-lg">상품 등록</a>
-        <a href="/mypage" class="px-3 py-2 bg-yellow-500 text-white rounded-lg">마이페이지</a>
+        <a href="/auction-item/new" class="px-3 py-2 bg-green-500 text-white rounded-lg">🛒 상품 등록</a>
+        <a href="/mypage" class="px-3 py-2 bg-yellow-500 text-white rounded-lg">👤 마이페이지</a>
 
-        <!-- ✅ 로그인 상태 확인 후 로그아웃 버튼 표시 -->
+        <!-- ✅ 로그인 상태: 로그아웃 버튼 표시 -->
         <form th:if="${userName != null}" th:action="@{/logout}" method="post">
-            <button type="submit" class="px-3 py-2 bg-red-500 text-white rounded-lg">로그아웃</button>
+            <button type="submit" class="px-3 py-2 bg-red-500 text-white rounded-lg">🚪 로그아웃</button>
         </form>
 
-        <!-- ✅ 로그아웃 상태에서는 로그인 버튼 표시 -->
-        <a th:if="${userName == null}" href="/login" class="px-3 py-2 bg-white text-blue-600 rounded-lg">로그인</a>
+        <!-- ✅ 로그아웃 상태: 로그인 버튼 표시 -->
+        <a th:if="${userName == null}" href="/login" class="px-3 py-2 bg-white text-blue-600 rounded-lg">🔑 로그인</a>
     </div>
 </nav>
 
 <!-- ✅ 인사말 -->
 <div class="container mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg text-center">
-    <h1 class="text-3xl font-bold text-gray-800">🎉 환영합니다, <span th:if="${userName != null}" th:text="${userName}"></span>!</h1>
-    <p class="text-gray-600 mt-2">경매 웹서비스에 오신 것을 환영합니다. 원하는 물건을 입찰하고, 직접 판매해보세요!</p>
+    <h1 class="text-3xl font-bold text-gray-800">
+        🎉 환영합니다, <span th:if="${userName != null}" th:text="${userName}"></span>!
+    </h1>
+    <p class="text-gray-600 mt-2">
+        경매 웹서비스에 오신 것을 환영합니다. 원하는 물건을 입찰하고, 직접 판매해보세요!
+    </p>
 
-    <!-- ✅ 관리자 계정일 경우 "관리자 페이지" 버튼 표시 -->
+    <!-- ✅ 관리자 계정이면 "관리자 페이지" 버튼 표시 -->
     <div th:if="${isAdmin}" class="mt-6">
         <a href="/admin" class="px-4 py-3 bg-red-500 text-white rounded-lg text-lg">⚙️ 관리자 페이지</a>
     </div>
@@ -38,13 +43,13 @@
     <!-- ✅ 로그인 여부에 따라 버튼 표시 -->
     <div class="mt-6 flex justify-center space-x-4">
         <th:block th:if="${userName != null}">
-            <!-- ✅ 로그인 상태일 때 -->
+            <!-- ✅ 로그인 상태 -->
             <a href="/auction-items" class="px-4 py-3 bg-blue-500 text-white rounded-lg text-lg">🔍 경매 목록 보기</a>
             <a href="/auction-item/new" class="px-4 py-3 bg-green-500 text-white rounded-lg text-lg">🛒 상품 등록</a>
         </th:block>
 
         <th:block th:if="${userName == null}">
-            <!-- ✅ 로그아웃 상태일 때 -->
+            <!-- ✅ 로그아웃 상태 -->
             <a href="/register" class="px-4 py-3 bg-yellow-500 text-white rounded-lg text-lg">📝 회원가입</a>
             <a href="/login" class="px-4 py-3 bg-blue-500 text-white rounded-lg text-lg">🔑 로그인</a>
         </th:block>
@@ -59,11 +64,13 @@
         <div th:each="item : ${latestItems}" class="bg-gray-100 p-4 rounded-lg shadow">
             <h3 class="text-lg font-semibold" th:text="${item.name}"></h3>
             <p class="text-gray-600 text-sm mt-1" th:text="${item.description}"></p>
-            <p class="text-red-500 mt-1">마감 시간: <span th:text="${#temporals.format(item.endTime, 'yyyy-MM-dd HH:mm')}"></span></p>
+            <p class="text-red-500 mt-1">⏳ 마감 시간:
+                <span th:text="${#temporals.format(item.endTime, 'yyyy-MM-dd HH:mm')}"></span>
+            </p>
 
             <a th:href="@{/auction-item/{id}(id=${item.id})}"
                class="block text-center px-3 py-2 bg-blue-500 text-white rounded-lg mt-3">
-                상세 보기
+                📜 상세 보기
             </a>
         </div>
     </div>

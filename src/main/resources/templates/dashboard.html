@@ -7,25 +7,31 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
+
+<!-- ✅ 네비게이션 바 -->
 <nav class="bg-blue-600 p-4 text-white flex justify-between items-center">
-    <a href="/" class="text-xl font-bold">경매 웹서비스</a>
+    <a href="/" class="text-xl font-bold">🏠 경매 웹서비스</a>
     <div class="mt-4">
-        <a href="/charge" class="px-4 py-2 bg-yellow-500 text-white rounded-lg">포인트 충전</a>
-        <a href="/logout" class="px-3 py-2 bg-red-500 text-white rounded-lg">로그아웃</a>
+        <a href="/charge" class="px-4 py-2 bg-yellow-500 text-white rounded-lg">💰 포인트 충전</a>
+        <a href="/logout" class="px-3 py-2 bg-red-500 text-white rounded-lg">🚪 로그아웃</a>
     </div>
 </nav>
 
+<!-- ✅ 대시보드 본문 -->
 <div class="container mx-auto mt-10">
-    <h1 class="text-3xl font-bold text-gray-800 text-center">내 대시보드</h1>
+    <h1 class="text-3xl font-bold text-gray-800 text-center">📊 내 대시보드</h1>
+
     <div class="bg-white p-6 rounded-lg shadow-md mt-6 w-3/4 mx-auto">
-        <p class="text-lg"><strong>이름:</strong> <span th:text="${userName}"></span></p>
-        <p class="text-lg"><strong>이메일:</strong> <span th:text="${email}"></span></p>
-        <p class="text-lg"><strong>보유 포인트:</strong> <span th:text="${points} + ' P'"></span></p>
-        <div class="mt-4">
-            <a href="/charge-history" class="px-4 py-2 bg-gray-500 text-white rounded-lg ml-2">충전 내역 보기</a>
-            <a href="/" class="px-4 py-2 bg-blue-600 text-white rounded-lg">홈으로</a>
+        <p class="text-lg"><strong>👤 이름:</strong> <span th:text="${userName}"></span></p>
+        <p class="text-lg"><strong>📧 이메일:</strong> <span th:text="${email}"></span></p>
+        <p class="text-lg text-green-600 font-semibold"><strong>💰 보유 포인트:</strong> <span th:text="${points} + ' P'"></span></p>
+
+        <div class="mt-4 flex justify-center space-x-4">
+            <a href="/charge-history" class="px-4 py-2 bg-gray-500 text-white rounded-lg">📜 충전 내역 보기</a>
+            <a href="/" class="px-4 py-2 bg-blue-600 text-white rounded-lg">🏠 홈으로</a>
         </div>
     </div>
 </div>
+
 </body>
 </html>

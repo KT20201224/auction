@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Getter
-@Setter
+@Setter // ✅ Setter 허용 (서비스 계층에서 값 변경 가능)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -33,12 +33,22 @@ public class Bid {
     private int bidAmount; // 입찰 금액
 
     @Column(nullable = false)
-    private LocalDateTime bidTime; // 입찰 시간
+    private LocalDateTime bidTime; // 입찰 시간 (자동 설정)
 
-    public Bid(User bidder, AuctionItem auctionItem, int bidAmount) {
-        this.bidder = bidder;
-        this.auctionItem = auctionItem;
-        this.bidAmount = bidAmount;
-        this.bidTime = LocalDateTime.now();
+    /**
+     * 새로운 입찰 객체를 생성하는 정적 메서드
+     *
+     * @param bidder 입찰자
+     * @param auctionItem 경매 상품
+     * @param bidAmount 입찰 금액
+     * @return 생성된 입찰 객체
+     */
+    public static Bid createBid(User bidder, AuctionItem auctionItem, int bidAmount) {
+        return Bid.builder()
+                .bidder(bidder)
+                .auctionItem(auctionItem)
+                .bidAmount(bidAmount)
+                .bidTime(LocalDateTime.now())
+                .build();
     }
 }

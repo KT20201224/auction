@@ -19,8 +19,9 @@
     </div>
 </nav>
 
-<!-- ✅ 본문 -->
+<!-- ✅ 경매 상세 정보 컨테이너 -->
 <div class="container mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+    <!-- ✅ 경매 상품 제목 -->
     <h1 class="text-2xl font-bold text-gray-800" th:text="${item.name}"></h1>
     <p class="text-gray-600 mt-2" th:text="${item.description}"></p>
 
@@ -29,28 +30,33 @@
         현재 최고 입찰가: <span th:text="${highestBidAmount}"></span>P
     </p>
 
-    <!-- ✅ 현재 사용자 보유 포인트 -->
+    <!-- ✅ 현재 사용자 보유 포인트 (로그인한 사용자만 표시) -->
     <p th:if="${user != null}" class="text-lg font-bold text-green-600 mt-2">
         내 보유 포인트: <span th:text="${userPoints}"></span>P
     </p>
 
-    <!-- ✅ 마감 시간 -->
+    <!-- ✅ 마감 시간 표시 -->
     <p class="text-gray-500 mt-1">
         마감 시간: <span th:text="${#temporals.format(item.endTime, 'yyyy-MM-dd HH:mm')}"></span>
     </p>
 
-    <!-- ✅ 입찰 폼 (경매 진행 중인 경우에만 표시) -->
+    <!-- ✅ 입찰 폼 (경매가 진행 중인 경우에만 표시) -->
     <div th:if="${item.endTime.isAfter(T(java.time.LocalDateTime).now())}" class="mt-6">
         <h2 class="text-xl font-bold text-gray-800">입찰하기</h2>
         <form th:action="@{/bid}" method="post" class="mt-4">
             <input type="hidden" name="auctionItemId" th:value="${item.id}">
-            <label for="bidAmount" class="block text-gray-700 font-medium">입찰 금액 (최소 <span th:text="${highestBidAmount + 1}"></span>P 이상)</label>
+            <label for="bidAmount" class="block text-gray-700 font-medium">
+                입찰 금액 (최소 <span th:text="${highestBidAmount + 1}"></span>P 이상)
+            </label>
             <input type="number" id="bidAmount" name="bidAmount" class="mt-2 p-2 border border-gray-300 rounded w-full" required>
 
-            <button type="submit" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg">입찰하기</button>
+            <button type="submit" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg">
+                입찰하기
+            </button>
         </form>
     </div>
-    <!-- ✅ 구매 확정 버튼 (낙찰자만 확인 가능) -->
+
+    <!-- ✅ 구매 확정 버튼 (낙찰자인 경우에만 표시) -->
     <div th:if="${item.winner != null and item.winner.email == #authentication.name and !item.purchased}" class="mt-4">
         <form th:action="@{/auction-item/{id}/confirm-purchase(id=${item.id})}" method="post">
             <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-lg">

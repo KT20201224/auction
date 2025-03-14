@@ -30,10 +30,17 @@ public class ChargeHistory {
     @Column(nullable = false)
     private LocalDateTime chargedAt; // 충전 날짜 및 시간
 
-    // 새로운 충전 내역을 생성하는 생성자 추가
-    public ChargeHistory(User user, int amount) {
-        this.user = user;
-        this.amount = amount;
-        this.chargedAt = LocalDateTime.now();
+    /**
+     * 🔹 포인트 충전 내역을 생성하는 정적 팩토리 메서드
+     * @param user 충전한 사용자
+     * @param amount 충전 금액
+     * @return 새로운 ChargeHistory 객체
+     */
+    public static ChargeHistory createChargeHistory(User user, int amount) {
+        return ChargeHistory.builder()
+                .user(user)
+                .amount(amount)
+                .chargedAt(LocalDateTime.now())
+                .build();
     }
 }

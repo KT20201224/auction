@@ -7,32 +7,36 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-<div class="container mx-auto mt-10 text-center">
-    <h1 class="text-3xl font-bold text-gray-800">포인트 충전 내역</h1>
 
-    <!-- 충전 내역이 없는 경우 안내 메시지 -->
+<!-- ✅ 포인트 충전 내역 컨테이너 -->
+<div class="container mx-auto mt-10 text-center">
+    <h1 class="text-3xl font-bold text-gray-800">💰 포인트 충전 내역</h1>
+
+    <!-- ✅ 충전 내역이 없는 경우 안내 메시지 -->
     <p th:if="${#lists.isEmpty(chargeHistoryList)}" class="text-gray-700 mt-4">
-        충전 내역이 없습니다.
+        🔹 충전 내역이 없습니다.
     </p>
 
-    <!-- 충전 내역이 있을 경우 테이블로 표시 -->
+    <!-- ✅ 충전 내역 테이블 (내역이 있을 경우) -->
     <table th:if="${not #lists.isEmpty(chargeHistoryList)}"
            class="w-1/2 mx-auto mt-6 border-collapse border border-gray-400">
         <thead>
         <tr class="bg-gray-200">
-            <th class="border border-gray-400 p-2">충전 금액</th>
-            <th class="border border-gray-400 p-2">충전 날짜</th>
+            <th class="border border-gray-400 p-2">🔹 충전 금액</th>
+            <th class="border border-gray-400 p-2">📅 충전 날짜</th>
         </tr>
         </thead>
         <tbody>
         <tr th:each="history : ${chargeHistoryList}">
-            <td class="border border-gray-400 p-2" th:text="${history.amount} + ' P'"></td>
-            <td class="border border-gray-400 p-2" th:text="${#temporals.format(history.chargedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+            <td class="border border-gray-400 p-2 text-green-600 font-bold" th:text="${history.amount} + ' P'"></td>
+            <td class="border border-gray-400 p-2 text-gray-700" th:text="${#temporals.format(history.chargedAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
         </tr>
         </tbody>
     </table>
 
-    <a href="/dashboard" class="mt-4 block text-blue-600">대시보드로 돌아가기</a>
+    <!-- ✅ 대시보드로 돌아가는 버튼 -->
+    <a href="/dashboard" class="mt-6 block text-blue-600 font-medium">🏠 대시보드로 돌아가기</a>
 </div>
+
 </body>
 </html>

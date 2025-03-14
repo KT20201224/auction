@@ -6,11 +6,11 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 /**
- * 경매 상품 엔티티
+ * 경매 상품 엔티티 클래스
  */
 @Entity
 @Getter
-@Setter
+@Setter // ✅ 엔티티 클래스에서 Setter 허용
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -42,7 +42,7 @@ public class AuctionItem {
     private User winner; // 낙찰자 (없으면 유찰)
 
     @Column(nullable = false)
-    private boolean isPurchased = false; // 🔹 구매 확정 여부 (기본값 false)
+    private boolean purchased = false; // 🔹 구매 확정 여부 (기본값 false)
 
     /**
      * 경매가 마감되었는지 여부를 반환
@@ -51,21 +51,5 @@ public class AuctionItem {
      */
     public boolean isAuctionEnded() {
         return LocalDateTime.now().isAfter(this.endTime);
-    }
-
-    /**
-     * 구매 확정 여부를 반환
-     *
-     * @return true(구매 완료), false(미구매)
-     */
-    public boolean isPurchased() {
-        return isPurchased;
-    }
-
-    /**
-     * 낙찰자가 구매 확정을 하면 상태를 변경
-     */
-    public void confirmPurchase() {
-        this.isPurchased = true;
     }
 }

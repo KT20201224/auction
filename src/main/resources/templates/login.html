@@ -3,26 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로그인</title>
+    <title>🔑 로그인
+
+        ✅ **정리된 주석 추가된 `login.html` (로그인 페이지)**
+
+        ```html
+        <!DOCTYPE html>
+        <html lang="ko">
+        <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>🔑 로그인</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 flex justify-center items-center h-screen">
+
+<!-- ✅ 로그인 폼 컨테이너 -->
 <div class="bg-white p-8 shadow-lg rounded-lg w-96">
-    <h2 class="text-2xl font-bold text-gray-800 text-center">로그인</h2>
+    <h2 class="text-2xl font-bold text-gray-800 text-center">🔑 로그인</h2>
+
+    <!-- ✅ 로그인 폼 -->
     <form method="post" action="/login">
+        <!-- ✅ 이메일 입력 -->
         <div class="mt-4">
             <label class="block text-gray-700">이메일</label>
             <input type="text" name="username" class="w-full p-2 border border-gray-300 rounded-lg" required>
         </div>
+
+        <!-- ✅ 비밀번호 입력 -->
         <div class="mt-4">
             <label class="block text-gray-700">비밀번호</label>
             <input type="password" name="password" class="w-full p-2 border border-gray-300 rounded-lg" required>
         </div>
-        <button type="submit" class="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg">로그인</button>
+
+        <!-- ✅ 로그인 버튼 -->
+        <button type="submit" class="w-full mt-4 bg-blue-600 text-white py-2 rounded-lg">
+            로그인
+        </button>
     </form>
+
+    <!-- ✅ 회원가입 링크 -->
     <p class="mt-4 text-gray-600 text-center">
         계정이 없으신가요? <a href="/register" class="text-blue-600">회원가입</a>
     </p>
 </div>
+
 </body>
 </html>

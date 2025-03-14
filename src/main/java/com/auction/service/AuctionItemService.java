@@ -10,11 +10,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 /**
- * 경매 상품 서비스 (낙찰자 결정 기능 포함)
+ * 🎯 경매 상품 서비스
+ * - 경매 종료 시 낙찰자 결정
+ * - 낙찰된 상품의 구매 확정 처리
+ * - 이메일 알림 발송 기능 포함
  */
 @Service
 public class AuctionItemService {
@@ -24,7 +27,10 @@ public class AuctionItemService {
     private final UserRepository userRepository;
     private final MailService mailService;
 
-    public AuctionItemService(AuctionItemRepository auctionItemRepository, BidRepository bidRepository, UserRepository userRepository, MailService mailService) {
+    public AuctionItemService(AuctionItemRepository auctionItemRepository,
+                              BidRepository bidRepository,
+                              UserRepository userRepository,
+                              MailService mailService) {
         this.auctionItemRepository = auctionItemRepository;
         this.bidRepository = bidRepository;
         this.userRepository = userRepository;
@@ -32,24 +38,28 @@ public class AuctionItemService {
     }
 
     /**
-     * 마감된 경매의 낙찰자를 결정하는 메서드
+     * 🔹 마감된 경매의 낙찰자를 결정하는 메서드
+     * - 1분마다 실행 (스케줄링)
      */
     @Transactional
-    @Scheduled(fixedRate = 5000) // 1분마다 실행
+    @Scheduled(fixedRate = 60000) // 1분마다 실행
     public void processAuctionEndings() {
-        List<AuctionItem> endedAuctions = auctionItemRepository.findByEndTimeBeforeAndWinnerIsNull(java.time.LocalDateTime.now());
+        List<AuctionItem> endedAuctions = auctionItemRepository.findByEndTimeBeforeAndWinnerIsNull(LocalDateTime.now());
 
         for (AuctionItem item : endedAuctions) {
             Bid highestBid = bidRepository.findTopByAuctionItemOrderByBidAmountDesc(item);
-            if (highestBid != null) {
-                item.setWinner(highestBid.getBidder());
-            } else {
-                item.setWinner(null); // 유찰 처리
-            }
+            item.setWinner((highestBid != null) ? highestBid.getBidder() : null); // 낙찰자 설정
             auctionItemRepository.save(item);
         }
     }
 
+    /**
+     * 🔹 구매 확정 처리
+     * - 낙찰자가 구매 확정을 진행하면, 판매자에게 포인트 지급
+     *
+     * @param itemId 구매 확정할 경매 상품 ID
+     * @param buyer 구매 확정을 진행하는 사용자
+     */
     @Transactional
     public void confirmPurchase(Long itemId, User buyer) {
         AuctionItem auctionItem = auctionItemRepository.findById(itemId)
@@ -71,14 +81,9 @@ public class AuctionItemService {
         int finalPrice = highestBid.getBidAmount();
         User seller = auctionItem.getSeller();
 
-        // 🚀 디버깅 로그 추가
-        System.out.println("✅ 판매자: " + seller.getEmail() + " / 기존 포인트: " + seller.getPoints());
-        System.out.println("✅ 낙찰 금액: " + finalPrice);
-
+        // ✅ 판매자에게 포인트 지급
         seller.setPoints(seller.getPoints() + finalPrice);
         userRepository.save(seller);
-
-        System.out.println("✅ 새로운 판매자 포인트: " + seller.getPoints());
 
         auctionItem.setPurchased(true);
         auctionItemRepository.save(auctionItem);
@@ -87,7 +92,7 @@ public class AuctionItemService {
     }
 
     /**
-     * 특정 판매자가 등록한 경매 상품 목록 조회
+     * 🔹 특정 판매자가 등록한 경매 상품 목록 조회
      *
      * @param seller 판매자
      * @return 판매자가 등록한 상품 목록
@@ -98,7 +103,7 @@ public class AuctionItemService {
     }
 
     /**
-     * 특정 사용자가 낙찰받은 상품 목록 조회
+     * 🔹 특정 사용자가 낙찰받은 상품 목록 조회
      *
      * @param winner 낙찰자
      * @return 낙찰받은 상품 목록
@@ -108,6 +113,11 @@ public class AuctionItemService {
         return auctionItemRepository.findByWinner(winner);
     }
 
+    /**
+     * 🔹 경매 종료 후 낙찰자 결정 및 이메일 전송
+     *
+     * @param itemId 종료된 경매 상품 ID
+     */
     @Transactional
     public void finalizeAuction(Long itemId) {
         AuctionItem auctionItem = auctionItemRepository.findById(itemId)
@@ -117,7 +127,7 @@ public class AuctionItemService {
             throw new IllegalStateException("경매가 아직 종료되지 않았습니다.");
         }
 
-        // 최고 입찰자 찾기
+        // ✅ 최고 입찰자 찾기
         Bid highestBid = bidRepository.findTopByAuctionItemOrderByBidAmountDesc(auctionItem);
         if (highestBid == null) {
             System.out.println("🚨 낙찰자가 없습니다.");
@@ -129,10 +139,21 @@ public class AuctionItemService {
         auctionItemRepository.save(auctionItem);
 
         // ✅ 낙찰자에게 이메일 전송
+        sendWinningEmail(winner, auctionItem, highestBid.getBidAmount());
+    }
+
+    /**
+     * 🔹 낙찰자에게 이메일 알림을 전송
+     *
+     * @param winner 낙찰자
+     * @param auctionItem 낙찰된 상품
+     * @param finalPrice 낙찰 가격
+     */
+    private void sendWinningEmail(User winner, AuctionItem auctionItem, int finalPrice) {
         String subject = "🎉 축하합니다! 경매 낙찰 안내";
         String message = "<h2>안녕하세요, " + winner.getName() + "님!</h2>"
                 + "<p>귀하가 입찰한 <strong>" + auctionItem.getName() + "</strong> 경매가 종료되었습니다.</p>"
-                + "<p>낙찰 가격: <strong>" + highestBid.getBidAmount() + "P</strong></p>"
+                + "<p>낙찰 가격: <strong>" + finalPrice + "P</strong></p>"
                 + "<p>구매 확정을 진행하려면 아래 링크를 클릭해주세요.</p>"
                 + "<a href='http://localhost:8080/auction-item/" + auctionItem.getId() + "'>상품 상세 페이지로 이동</a>";
 

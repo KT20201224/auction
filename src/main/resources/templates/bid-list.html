@@ -7,17 +7,20 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
-<div class="container mx-auto mt-10 text-center">
-    <h1 class="text-3xl font-bold text-gray-800">입찰 내역</h1>
 
+<!-- ✅ 본문 컨테이너 -->
+<div class="container mx-auto mt-10 text-center">
+    <h1 class="text-3xl font-bold text-gray-800">📜 입찰 내역</h1>
+
+    <!-- ✅ 현재 경매 상품명 표시 -->
     <h2 class="text-2xl font-semibold text-gray-800 mt-6" th:text="${auctionItem.name}"></h2>
 
-    <!-- 입찰 내역이 없는 경우 -->
+    <!-- ✅ 입찰 내역이 없는 경우 -->
     <p th:if="${#lists.isEmpty(bidList)}" class="text-gray-700 mt-4">
         현재까지 입찰이 없습니다.
     </p>
 
-    <!-- 입찰 내역이 있는 경우 -->
+    <!-- ✅ 입찰 내역이 있는 경우 (테이블 형식) -->
     <table th:if="${not #lists.isEmpty(bidList)}"
            class="w-3/4 mx-auto mt-6 border-collapse border border-gray-400">
         <thead>
@@ -36,10 +39,16 @@
         </tbody>
     </table>
 
+    <!-- ✅ 네비게이션 버튼 -->
     <div class="mt-6">
-        <a th:href="@{/auction-item/{id}(id=${auctionItem.id})}" class="px-4 py-2 bg-gray-500 text-white rounded-lg">상품 상세 페이지</a>
-        <a href="/auction-items" class="px-4 py-2 bg-blue-600 text-white rounded-lg ml-2">경매 상품 목록</a>
+        <a th:href="@{/auction-item/{id}(id=${auctionItem.id})}" class="px-4 py-2 bg-gray-500 text-white rounded-lg">
+            🔙 상품 상세 페이지
+        </a>
+        <a href="/auction-items" class="px-4 py-2 bg-blue-600 text-white rounded-lg ml-2">
+            🏠 경매 상품 목록
+        </a>
     </div>
 </div>
+
 </body>
 </html>

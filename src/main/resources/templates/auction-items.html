@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">
+
 <!-- ✅ 네비게이션 바 -->
 <nav class="bg-blue-600 p-4 text-white flex justify-between items-center">
     <a href="/" class="text-xl font-bold">경매 웹서비스</a>
@@ -27,13 +28,14 @@
     </form>
 </div>
 
-
 <!-- ✅ 상품 목록 -->
 <div class="container mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
     <h1 class="text-2xl font-bold mb-4">진행 중인 경매</h1>
 
+    <!-- ✅ 상품 카드 그리드 (반응형) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div th:each="item : ${items}" class="bg-white p-6 rounded-lg shadow-lg border border-gray-300">
+            <!-- ✅ 상품명 -->
             <h2 class="text-xl font-semibold text-gray-900" th:text="${item.name}"></h2>
             <p class="text-gray-600 text-sm mt-1" th:text="${item.description}"></p>
 
@@ -42,9 +44,10 @@
                 현재 입찰가: <span th:text="${highestBids[item.id]}"></span>P
             </p>
 
+            <!-- ✅ 마감 시간 -->
             <p class="text-gray-700 mt-1">⏳ 마감 시간: <span th:text="${#temporals.format(item.endTime, 'yyyy-MM-dd HH:mm')}"></span></p>
 
-            <!-- ✅ 입찰 마감 여부 확인 후 버튼 변경 -->
+            <!-- ✅ 입찰 버튼 (입찰 가능 여부에 따라 변경) -->
             <div class="mt-4">
                 <a th:if="${item.endTime.isAfter(T(java.time.LocalDateTime).now())}"
                    th:href="@{/auction-item/{id}(id=${item.id})}"
@@ -60,5 +63,6 @@
         </div>
     </div>
 </div>
+
 </body>
 </html>
