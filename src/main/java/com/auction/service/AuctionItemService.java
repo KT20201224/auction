@@ -22,11 +22,13 @@ public class AuctionItemService {
     private final AuctionItemRepository auctionItemRepository;
     private final BidRepository bidRepository;
     private final UserRepository userRepository;
+    private final MailService mailService;
 
-    public AuctionItemService(AuctionItemRepository auctionItemRepository, BidRepository bidRepository, UserRepository userRepository) {
+    public AuctionItemService(AuctionItemRepository auctionItemRepository, BidRepository bidRepository, UserRepository userRepository, MailService mailService) {
         this.auctionItemRepository = auctionItemRepository;
         this.bidRepository = bidRepository;
         this.userRepository = userRepository;
+        this.mailService = mailService;
     }
 
     /**
@@ -106,4 +108,34 @@ public class AuctionItemService {
         return auctionItemRepository.findByWinner(winner);
     }
 
+    @Transactional
+    public void finalizeAuction(Long itemId) {
+        AuctionItem auctionItem = auctionItemRepository.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("경매 상품을 찾을 수 없습니다."));
+
+        if (!auctionItem.isAuctionEnded()) {
+            throw new IllegalStateException("경매가 아직 종료되지 않았습니다.");
+        }
+
+        // 최고 입찰자 찾기
+        Bid highestBid = bidRepository.findTopByAuctionItemOrderByBidAmountDesc(auctionItem);
+        if (highestBid == null) {
+            System.out.println("🚨 낙찰자가 없습니다.");
+            return; // 입찰자가 없으면 낙찰자 없음
+        }
+
+        User winner = highestBid.getBidder();
+        auctionItem.setWinner(winner);
+        auctionItemRepository.save(auctionItem);
+
+        // ✅ 낙찰자에게 이메일 전송
+        String subject = "🎉 축하합니다! 경매 낙찰 안내";
+        String message = "<h2>안녕하세요, " + winner.getName() + "님!</h2>"
+                + "<p>귀하가 입찰한 <strong>" + auctionItem.getName() + "</strong> 경매가 종료되었습니다.</p>"
+                + "<p>낙찰 가격: <strong>" + highestBid.getBidAmount() + "P</strong></p>"
+                + "<p>구매 확정을 진행하려면 아래 링크를 클릭해주세요.</p>"
+                + "<a href='http://localhost:8080/auction-item/" + auctionItem.getId() + "'>상품 상세 페이지로 이동</a>";
+
+        mailService.sendEmail(winner.getEmail(), subject, message);
+    }
 }
